@@ -8,7 +8,7 @@ use Filter::Util::Call ();
 use Cwd ();
 use Hook::LexWrap ();
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 our $DEBUG     = 0;
 our $EXPORT    = 0;
