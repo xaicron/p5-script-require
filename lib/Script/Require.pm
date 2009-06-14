@@ -22,6 +22,10 @@ my %REQUIRED;
 # $SUPERに呼び出し元のパッケージ名を入れる
 #
 sub import {
+	strict->import;
+	warnings->import;
+	utf8->import;
+	
 	my $current = Cwd::getcwd;
 	Filter::Util::Call::filter_add(sub {
 		my $status;
@@ -47,7 +51,7 @@ sub import {
 			"$PAKAGE\::$_";
 		};
 		
-		$_ = qq|use strict;use warnings;use utf8;package $pkg;our \$SUPER;sub load { &$PAKAGE\::load(\@_) }$data;\nno warnings;\n"$pkg";|;
+		$_ = qq|;package $pkg;our \$SUPER;sub load { &$PAKAGE\::load(\@_) }$data;\nno warnings;\n"$pkg";|;
 		
 		$REQUIRED{$file} = $pkg;
 		return $count;
@@ -147,15 +151,26 @@ __END__
 
 =head1 NAME
 
-Script::Require -
+Script::Require is to hook the script file.
 
 =head1 SYNOPSIS
 
+  # main.pl
   use Script::Require;
+  
+  __PACKAGE__->load('shout.pl', @args); # shout.pl at run method to call
+  
+  # shout.pl
+  use Script::Require;
+  
+  sub run {
+      my $self = shift; # this package name (probably 'Script::Require::shout_pl')
+      print "loaaaaaaaaaaaaaaaaaaaaaaaaaaaaad !! @_";
+  }
 
 =head1 DESCRIPTION
 
-Script::Require is
+Script::Require is to hook the script file.
 
 =head1 AUTHOR
 
