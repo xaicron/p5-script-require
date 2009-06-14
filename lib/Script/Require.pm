@@ -6,6 +6,7 @@ use 5.00801;
 use Carp ();
 use Filter::Util::Call ();
 use Cwd ();
+use Hook::LexWrap ();
 
 our $VERSION = 0.01;
 
@@ -17,7 +18,7 @@ my $PAKAGE = __PACKAGE__;
 
 my %REQUIRED;
 
-# ソースフィルター (MENTA::Controller参照)
+# ソースフィルター (MENTA::Controllerのパクリ)
 # use strict, warnings, utf8する
 # $SUPERに呼び出し元のパッケージ名を入れる
 #
@@ -74,23 +75,19 @@ sub load {
 		Carp::croak "can't call myself at the __PACKAGE__->load()." if $hook_file =~ /$load_file/;
 	}
 	
-	# 呼び出して実行
 	my $pkg = &_require_once($hook_file);
 	print STDERR "DEBUG(Lv.1): package = $pkg\n" if $DEBUG;
 	
 	my $exists = {};
 	local $EXPORT = $EXPORT;
 	
-	# 呼び出し元の関数を利用できるようにする
-	&_method_hogehoge($pkg, $caller, $exists, 0);
+	Hook::LexWrap::wrap(
+		"$pkg\::run",
+		pre  => sub { &_method_hogehoge($pkg, $caller, $exists, 0); },
+		post => sub { &_method_hogehoge($pkg, $caller, $exists, 1); }
+	);
 	
-	# 実行
-	$pkg->run(@_);
-	
-	# 名前空間を元に戻す
-	&_method_hogehoge($pkg, $caller, $exists, 1);
-	
-	return 1;
+	return $pkg->run(@_);
 }
 
 sub _require_once {
@@ -171,6 +168,52 @@ Script::Require is to hook the script file.
 =head1 DESCRIPTION
 
 Script::Require is to hook the script file.
+use several modules to enable additional features of Perl.
+Roughly as follows:
+
+  # test.pl saved
+  use Script::Require;
+  print __PACKAGE__;
+  
+  # console
+  > perl -MO=Deparse test.pl
+  use Script::Require;
+  package Script::Require::test;
+  use warnings;
+  use strict 'refs';
+  our $SUPER;
+  sub load {
+      &Script::Require::load(@_);
+  }
+  print 'Script::Require::test';
+  no warnings;
+  '???';
+  test.pl syntax OK
+
+=head1 METHODS
+
+=over
+
+=item load
+
+run the script file after load.
+
+  # main.pl
+  use Script::Require;
+  
+  my $content = __PACKAGE__->load('get_html.pl', 'http://www.example.com');
+  
+  # get_html.pl
+  use Script::Require;
+  use LWP::Simple;
+  
+  sub run {
+      my $self = shift; # this package name (probably 'Script::Require::get_html_pl')
+      my $uri = shift;
+      return get $uri;
+  }
+
+=back
 
 =head1 AUTHOR
 
