@@ -2,13 +2,13 @@ package Script::Require;
 
 use strict;
 use warnings;
-use 5.00801;
+use 5.008001;
 use Carp ();
 use Filter::Util::Call ();
 use Cwd ();
 use Hook::LexWrap ();
 
-our $VERSION = 0.02;
+our $VERSION = '0.02';
 
 our $DEBUG     = 0;
 our $EXPORT    = 0;
