@@ -161,7 +161,7 @@ Script::Require is to hook the script file.
   use Script::Require;
   
   sub run {
-      my $self = shift; # this package name (probably 'Script::Require::shout_pl')
+      my $self = shift; # this package name (probably 'Script::Require::shout')
       print "loaaaaaaaaaaaaaaaaaaaaaaaaaaaaad !! @_";
   }
 
